@@ -118,6 +118,7 @@ body {
 
 
 
+
     let audioContext;
     let oscillator;
     let gainNode; 
@@ -155,9 +156,11 @@ body {
         const n_hesapla = YARIM_SES_SAYISI * Math.log2(frekans / A4_FREKANS);
         const n_tam = Math.round(n_hesapla);
 
-        const nota_indeksi = n_tam % YARIM_SES_SAYISI;
+        const nota_indeksi = n_tam % YARIM_SES_SAYISI; 
+
 
         const oktav = 4 + Math.floor(n_tam / YARIM_SES_SAYISI);
+
 
 
         const nota_adi = NOTA_ISIMLERI[nota_indeksi];
