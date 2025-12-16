@@ -1,279 +1,153 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>İnteraktif Frekans Ayarlayıcı ve Ses Kontrolü</title>
-<style>
-/* ------------------------------------- */
-/* CSS KODU */
-/* ------------------------------------- */
-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    margin: 0;
-    font-family: sans-serif;
-    background-color: #f0f0f0;
-}
-
-#frequency-display {
-    font-size: 2em;
-    font-weight: bold;
-    margin-bottom: 20px;
-    color: #34495e;
-}
-
-/* Kadran Stilleri */
-#dial-container {
-    position: relative;
-    width: 200px;
-    height: 200px;
-    background-color: #ccc;
-    border-radius: 50%;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    cursor: grab;
-    touch-action: none; 
-}
-
-#dial {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: linear-gradient(145deg, #e6e6e6, #ffffff);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#indicator {
-    position: absolute;
-    width: 8px;
-    height: 80px;
-    background-color: #e74c3c;
-    transform-origin: bottom center;
-    top: 20px;
-    left: 50%;
-    margin-left: -4px;
-    border-radius: 4px;
-    transition: transform 0.05s linear;
-}
-
-#center-dot {
-    width: 20px;
-    height: 20px;
-    background-color: #34495e;
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10;
-}
-
-/* Play/Pause Buton Stili */
-#play-pause-btn {
-    margin-top: 15px;
-    padding: 10px 20px;
-    font-size: 1.1em;
-    font-weight: bold;
-    color: white;
-    background-color: #2ecc71; /* Yeşil Play */
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-#play-pause-btn.paused {
-    background-color: #e74c3c; /* Kırmızı Pause */
-}
-</style>
-</head>
-<body>
-
-<div id="frequency-display">440.00 Hz - A4</div>
-
-<div id="dial-container">
-    <div id="dial">
-        <div id="indicator"></div>
-    </div>
-    <div id="center-dot"></div>
-</div>
-
-<button id="play-pause-btn">Pause ⏸️</button>
-
-<div style="margin-top: 20px; width: 250px; text-align: center;">
-    <label for="volume-slider" style="font-weight: bold; color: #34495e;">Ses Şiddeti</label>
-    <input type="range" id="volume-slider" min="0" max="100" value="50" style="width: 100%;">
-</div>
-
-<p style="margin-top: 10px; color: #555; font-size: 0.8em;">Ses gelmiyorsa lütfen telefonunuzun Medya Sesini açın.</p>
-
-<script>
-    // ------------------------------------- 
-    // JAVASCRIPT KODU
-    // ------------------------------------- 
-    const A4_FREKANS = 440.0;
-    const YARIM_SES_SAYISI = 12;
-    const NOTA_ISIMLERI = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
-
-    let audioContext;
-    let oscillator;
-    let gainNode; 
-    let isPlaying = true; // Sesin çalma durumunu tutar
-
-    let currentAngle = 0;
-    let currentFrequency = A4_FREKANS;
-    
-    const display = document.getElementById('frequency-display');
-    const dialContainer = document.getElementById('dial-container');
-    const indicator = document.getElementById('indicator');
+    const activateButton = document.getElementById('activate-button');
+    const dataDisplay = document.getElementById('data-display');
+    const gaugeNeedle = document.getElementById('gauge-needle');
     const volumeSlider = document.getElementById('volume-slider');
-    const playPauseBtn = document.getElementById('play-pause-btn'); 
+    const frequencyDisplay = document.getElementById('frequency-display');
+    
+    let isPaused = false;
+    let currentValue = 70; // Varsayılan başlangıç değeri
+    let needleInterval; // Dinamik hareket için zamanlayıcı
 
-    function setupAudio() {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
-        oscillator = audioContext.createOscillator();
-        oscillator.type = 'sine';
-        gainNode = audioContext.createGain();
-        
-        gainNode.gain.setValueAtTime(volumeSlider.value / 100, audioContext.currentTime); 
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
+    // --- YENİ FONKSİYON: Local Storage'dan ayarları yükler ---
+    function loadSettings() {
+        const savedVolume = localStorage.getItem('ritimAppVolume');
+        const savedPaused = localStorage.getItem('ritimAppPaused');
 
-        oscillator.start();
-    }
-    setupAudio(); 
-
-    // --- Frekansı Notaya Çevirme Fonksiyonu ---
-    function frekansiNotayaCevir(frekans) {
-        if (frekans <= 0) return "0.00 Hz - ---";
-        
-        const n_hesapla = YARIM_SES_SAYISI * Math.log2(frekans / A4_FREKANS);
-        const n_tam = Math.round(n_hesapla);
-
-        const nota_indeksi = (n_tam + 9) % YARIM_SES_SAYISI;
-        const oktav = 4 + Math.floor((n_tam + 9) / YARIM_SES_SAYISI);
-
-        const nota_adi = NOTA_ISIMLERI[nota_indeksi];
-        return `${frekans.toFixed(2)} Hz - ${nota_adi}${oktav}`;
-    }
-
-    // --- Hareket Mantığı ---
-    let isDragging = false;
-    let center = { x: 0, y: 0 };
-    let startAngle = 0;
-    let startDragAngle = 0;
-
-    function calculateCenter() {
-        const rect = dialContainer.getBoundingClientRect();
-        center.x = rect.left + rect.width / 2;
-        center.y = rect.top + rect.height / 2;
-    }
-
-    function getAngle(x, y) {
-        const dx = x - center.x;
-        const dy = y - center.y;
-        let angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
-        if (angle < 0) angle += 360;
-        return angle;
-    }
-
-    function getCoords(e) {
-        const point = e.touches ? e.touches[0] : e;
-        return { x: point.clientX, y: point.clientY };
-    }
-
-    const handleStart = (e) => {
-        // Ses bağlamını ilk dokunmada başlat
-        if (audioContext.state === 'suspended') {
-            audioContext.resume();
-            isPlaying = true;
-            playPauseBtn.textContent = 'Pause ⏸️';
-            playPauseBtn.classList.remove('paused');
+        if (savedVolume !== null) {
+            currentValue = parseInt(savedVolume);
+            volumeSlider.value = currentValue;
         }
 
-        isDragging = true;
-        calculateCenter();
-        
-        if (e.touches) e.preventDefault(); 
-        
-        const coords = getCoords(e);
-        startDragAngle = getAngle(coords.x, coords.y);
-        startAngle = currentAngle;
-        dialContainer.style.cursor = 'grabbing';
-    };
+        if (savedPaused !== null) {
+            isPaused = (savedPaused === 'true');
+        }
+    }
 
-    const handleMove = (e) => {
-        if (!isDragging) return;
-        if (e.touches) e.preventDefault();
-        
-        const coords = getCoords(e);
-        const currentDragAngle = getAngle(coords.x, coords.y);
-        
-        let diff = currentDragAngle - startDragAngle;
+    // --- YENİ FONKSİYON: Local Storage'a ayarları kaydeder ---
+    function saveSettings() {
+        localStorage.setItem('ritimAppVolume', currentValue.toString());
+        localStorage.setItem('ritimAppPaused', isPaused.toString());
+    }
 
-        if (diff > 180) diff -= 360;
-        if (diff < -180) diff += 360;
+    // Kadran İğnesi Güncelleme Fonksiyonu
+    function updateNeedle(value) {
+        const minAngle = -60;
+        const maxAngle = 60;
+        const angle = minAngle + (value / 100) * (maxAngle - minAngle);
+        gaugeNeedle.style.transform = `rotate(${angle}deg)`;
+    }
 
-        currentAngle = startAngle + diff;
-        indicator.style.transform = `rotate(${currentAngle}deg)`;
+    // Frekans ve Nota Metnini Günceller
+    function updateFrequencyDisplay(value) {
+        const minFreq = 380;
+        const maxFreq = 500;
+        const freqRange = maxFreq - minFreq;
+        const currentFreq = minFreq + (value / 100) * freqRange;
 
-        const deltaFrequency = diff * 0.5; 
-        currentFrequency += deltaFrequency;
+        let noteName = "Harmonik";
+        if (currentFreq < 400) { noteName = "F#3"; } 
+        else if (currentFreq < 430) { noteName = "G4"; } 
+        else if (currentFreq < 450) { noteName = "A4"; } 
+        else if (currentFreq < 480) { noteName = "B4"; } 
+        else { noteName = "C5"; }
 
-        if (currentFrequency < 1.0) currentFrequency = 1.0;
-        
-        // Ses frekansını güncelle
-        oscillator.frequency.setValueAtTime(currentFrequency, audioContext.currentTime); 
-        
-        display.textContent = frekansiNotayaCevir(currentFrequency);
-        
-        startDragAngle = currentDragAngle;
-        startAngle = currentAngle;
-    };
-
-    const handleEnd = () => {
-        isDragging = false;
-        dialContainer.style.cursor = 'grab';
-    };
+        frequencyDisplay.textContent = `${currentFreq.toFixed(2)} Hz - ${noteName}`;
+    }
     
-    // Play/Pause İşlemi
-    const togglePlayPause = () => {
-        if (isPlaying) {
-            audioContext.suspend();
-            playPauseBtn.textContent = 'Play ▶️';
-            playPauseBtn.classList.add('paused');
+    // İğneye Titreşim Ekler
+    function startNeedleMovement() {
+        if (needleInterval) clearInterval(needleInterval);
+
+        needleInterval = setInterval(() => {
+            const drift = (Math.random() * 6) - 3;
+            let newValue = currentValue + drift;
+
+            if (newValue < 0) newValue = 0;
+            if (newValue > 100) newValue = 100;
+
+            updateNeedle(newValue);
+            updateFrequencyDisplay(newValue);
+
+        }, 100);
+    }
+
+    function stopNeedleMovement() {
+        if (needleInterval) {
+            clearInterval(needleInterval);
+            needleInterval = null;
+            updateNeedle(currentValue); 
+            updateFrequencyDisplay(currentValue);
+        }
+    }
+    
+    // --- BAŞLANGIÇ İŞLEMLERİ ---
+    
+    // 1. Ayarları yükle
+    loadSettings();
+
+    // 2. Slider'ın görsel durumunu ve başlangıç metnini ayarla
+    volumeSlider.style.background = `linear-gradient(to right, var(--color-neon) ${currentValue}%, rgba(245, 245, 245, 0.2) ${currentValue}%)`;
+    updateNeedle(currentValue);
+    updateFrequencyDisplay(currentValue);
+    
+    // 3. Pause durumuna göre başlangıç durumunu ayarla
+    if (!isPaused) {
+        // Eğer aktif durumda kaydedilmişse, hareketi başlat
+        activateButton.innerHTML = 'Pause <span class="ml-2">||</span>';
+        activateButton.style.backgroundColor = 'var(--color-neon)';
+        activateButton.style.color = 'black';
+        dataDisplay.innerHTML = `Bağlantı Durumu: <span class="text-white header-glow">AKTİF - RİTİM BAŞLADI!</span>`;
+        frequencyDisplay.style.color = 'white';
+        startNeedleMovement();
+    } else {
+        // Eğer duraklatılmış durumda kaydedilmişse, görseli güncelle
+        activateButton.innerHTML = 'Aktif <span class="ml-2">▶</span>';
+        activateButton.style.backgroundColor = 'var(--color-light-form)';
+        activateButton.style.color = 'var(--color-bg-deep)';
+        dataDisplay.innerHTML = `Bağlantı Durumu: <span class="text-yellow-400 glow-text-sm">DURAKLATILDI.</span>`;
+        frequencyDisplay.style.color = 'gray';
+        stopNeedleMovement(); // Hareketi durdur
+    }
+    
+    // --- OLAY DİNLEYİCİLERİ ---
+
+    activateButton.addEventListener('click', () => {
+        isPaused = !isPaused;
+        
+        if (isPaused) {
+            stopNeedleMovement();
+            activateButton.innerHTML = 'Aktif <span class="ml-2">▶</span>';
+            activateButton.style.backgroundColor = 'var(--color-light-form)';
+            activateButton.style.color = 'var(--color-bg-deep)';
+            dataDisplay.innerHTML = `Bağlantı Durumu: <span class="text-yellow-400 glow-text-sm">DURAKLATILDI.</span>`;
+            frequencyDisplay.style.color = 'gray';
+
         } else {
-            audioContext.resume();
-            playPauseBtn.textContent = 'Pause ⏸️';
-            playPauseBtn.classList.remove('paused');
+            startNeedleMovement();
+            activateButton.innerHTML = 'Pause <span class="ml-2">||</span>';
+            activateButton.style.backgroundColor = 'var(--color-neon)';
+            activateButton.style.color = 'black';
+            dataDisplay.innerHTML = `Bağlantı Durumu: <span class="text-white header-glow">AKTİF - RİTİM BAŞLADI!</span>`;
+            frequencyDisplay.style.color = 'white';
         }
-        isPlaying = !isPlaying;
-    };
-    
-    // --- Olay Dinleyicileri ---
-    dialContainer.addEventListener('mousedown', handleStart);
-    document.addEventListener('mousemove', handleMove);
-    document.addEventListener('mouseup', handleEnd);
-
-    dialContainer.addEventListener('touchstart', handleStart);
-    document.addEventListener('touchmove', handleMove, { passive: false });
-    document.addEventListener('touchend', handleEnd);
-    
-    volumeSlider.addEventListener('input', (e) => {
-        const newVolume = e.target.value / 100; 
-        gainNode.gain.setValueAtTime(newVolume, audioContext.currentTime); 
+        
+        // Pause durumunu kaydet
+        saveSettings();
     });
-    
-    // Play/Pause butonuna basıldığında
-    playPauseBtn.addEventListener('click', togglePlayPause);
 
-
-    display.textContent = frekansiNotayaCevir(currentFrequency);
-</script>
-</body>
-</html>
+    // Ses Şiddeti kaydırıcısı
+    volumeSlider.addEventListener('input', (e) => {
+        currentValue = parseInt(e.target.value);
+        
+        // Kaydırıcının doluluk rengini güncelle
+        volumeSlider.style.background = `linear-gradient(to right, var(--color-neon) ${currentValue}%, rgba(245, 245, 245, 0.2) ${currentValue}%)`;
+        
+        // Eğer duraklatılmışsa, iğneyi ve metni sabitle
+        if (isPaused) {
+            updateNeedle(currentValue); 
+            updateFrequencyDisplay(currentValue);
+        }
+        
+        // Ses şiddetini kaydet
+        saveSettings();
+    });
