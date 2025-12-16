@@ -8,31 +8,39 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    height: 100vh;
-    margin: 0;
+    justify-content: center; /* İçeriği dikeyde ortalar */
+    height: 100vh; /* Ekranın tamamını kapla */
+    margin: 0; /* Kenar boşluklarını sıfırla */
+    padding: 0; /* İç boşlukları sıfırla */
     font-family: sans-serif;
     background-color: #f0f0f0;
+    /* Yeni Ekleme: Genişliği de zorla */
+    width: 100%; 
 }
 
+
 #frequency-display {
-    font-size: 2em;
+    /* em yerine vh (viewport height) kullanıyoruz */
+    font-size: 8vh; 
     font-weight: bold;
-    margin-bottom: 20px;
     color: #34495e;
+    margin-bottom: 5vh; /* Kadran ile arasındaki boşluk */
 }
+
 
 /* Kadran Stilleri (Aynı) */
 #dial-container {
     position: relative;
-    width: 350px;
-    height: 350px;
+    /* Px yerine vmin kullanıyoruz (ekranın %80'i) */
+    width: 80vmin; 
+    height: 80vmin;
     background-color: #ccc;
     border-radius: 50%;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     cursor: grab;
-    touch-action: none; 
+    touch-action: none;
 }
+
 
 #dial {
     width: 100%;
