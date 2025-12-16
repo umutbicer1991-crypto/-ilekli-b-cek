@@ -228,7 +228,7 @@ body {
         currentAngle = startAngle + diff;
         indicator.style.transform = `rotate(${currentAngle}deg)`;
 
-        const deltaFrequency = diff * 0.5; 
+        const deltaFrequency = diff * 0.15; 
         currentFrequency += deltaFrequency;
 
         if (currentFrequency < 1.0) currentFrequency = 1.0;
