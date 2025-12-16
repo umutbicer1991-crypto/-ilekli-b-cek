@@ -6,26 +6,20 @@
 /* ------------------------------------- */
 body {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center; /* İçeriği dikeyde ortalar */
-    height: 100vh; /* Ekranın tamamını kapla */
-    margin: 0; /* Kenar boşluklarını sıfırla */
-    padding: 0; /* İç boşlukları sıfırla */
-    font-family: sans-serif;
-    background-color: #f0f0f0;
-    /* Yeni Ekleme: Genişliği de zorla */
-    width: 100%; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    /* ... */
 }
+
 
 
 #frequency-display {
-    /* em yerine vh (viewport height) kullanıyoruz */
-    font-size: 8vh; 
-    font-weight: bold;
-    color: #34495e;
-    margin-bottom: 5vh; /* Kadran ile arasındaki boşluk */
+    /* ... */
+    /* margin-bottom: 5vh;  <-- Bu satırı bul */
+    margin-bottom: 3vh; /* Veya 2vh yapabiliriz, küçük bir boşluk yeterli */
 }
+
 
 
 /* Kadran Stilleri (Aynı) */
@@ -109,12 +103,12 @@ body {
 
 <button id="play-pause-btn">Pause ⏸️</button>
 
-<div style="margin-top: 20px; width: 250px; text-align: center;">
+<div style= width:250px; text-align: center;">
     <label for="volume-slider" style="font-weight: bold; color: #34495e;">Ses Şiddeti</label>
     <input type="range" id="volume-slider" min="0" max="100" value="50" style="width: 100%;">
 </div>
 
-<p style="margin-top: 10px; color: #555; font-size: 0.8em;">Ses gelmiyorsa lütfen telefonunuzun Medya Sesini açın.</p>
+<p style= color: #555; font-size: 0.8em;">Ses gelmiyorsa lütfen telefonunuzun Medya Sesini açın.</p>
 
 <script>
     // ------------------------------------- 
