@@ -1,153 +1,58 @@
-    const activateButton = document.getElementById('activate-button');
-    const dataDisplay = document.getElementById('data-display');
-    const gaugeNeedle = document.getElementById('gauge-needle');
-    const volumeSlider = document.getElementById('volume-slider');
-    const frequencyDisplay = document.getElementById('frequency-display');
-    
-    let isPaused = false;
-    let currentValue = 70; // Varsayılan başlangıç değeri
-    let needleInterval; // Dinamik hareket için zamanlayıcı
+<div class="w-full max-w-xl mx-auto">
 
-    // --- YENİ FONKSİYON: Local Storage'dan ayarları yükler ---
-    function loadSettings() {
-        const savedVolume = localStorage.getItem('ritimAppVolume');
-        const savedPaused = localStorage.getItem('ritimAppPaused');
+    <header class="text-center mb-10">
+        <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2 header-glow">
+            Sürreal Ritim Uygulaması
+        </h1>
+        <p class="text-lg font-light text-gray-400 glow-text-sm">
+            Dijital Derinlik ve Ruhani Formlar
+        </p>
+    </header>
 
-        if (savedVolume !== null) {
-            currentValue = parseInt(savedVolume);
-            volumeSlider.value = currentValue;
-        }
-
-        if (savedPaused !== null) {
-            isPaused = (savedPaused === 'true');
-        }
-    }
-
-    // --- YENİ FONKSİYON: Local Storage'a ayarları kaydeder ---
-    function saveSettings() {
-        localStorage.setItem('ritimAppVolume', currentValue.toString());
-        localStorage.setItem('ritimAppPaused', isPaused.toString());
-    }
-
-    // Kadran İğnesi Güncelleme Fonksiyonu
-    function updateNeedle(value) {
-        const minAngle = -60;
-        const maxAngle = 60;
-        const angle = minAngle + (value / 100) * (maxAngle - minAngle);
-        gaugeNeedle.style.transform = `rotate(${angle}deg)`;
-    }
-
-    // Frekans ve Nota Metnini Günceller
-    function updateFrequencyDisplay(value) {
-        const minFreq = 380;
-        const maxFreq = 500;
-        const freqRange = maxFreq - minFreq;
-        const currentFreq = minFreq + (value / 100) * freqRange;
-
-        let noteName = "Harmonik";
-        if (currentFreq < 400) { noteName = "F#3"; } 
-        else if (currentFreq < 430) { noteName = "G4"; } 
-        else if (currentFreq < 450) { noteName = "A4"; } 
-        else if (currentFreq < 480) { noteName = "B4"; } 
-        else { noteName = "C5"; }
-
-        frequencyDisplay.textContent = `${currentFreq.toFixed(2)} Hz - ${noteName}`;
-    }
-    
-    // İğneye Titreşim Ekler
-    function startNeedleMovement() {
-        if (needleInterval) clearInterval(needleInterval);
-
-        needleInterval = setInterval(() => {
-            const drift = (Math.random() * 6) - 3;
-            let newValue = currentValue + drift;
-
-            if (newValue < 0) newValue = 0;
-            if (newValue > 100) newValue = 100;
-
-            updateNeedle(newValue);
-            updateFrequencyDisplay(newValue);
-
-        }, 100);
-    }
-
-    function stopNeedleMovement() {
-        if (needleInterval) {
-            clearInterval(needleInterval);
-            needleInterval = null;
-            updateNeedle(currentValue); 
-            updateFrequencyDisplay(currentValue);
-        }
-    }
-    
-    // --- BAŞLANGIÇ İŞLEMLERİ ---
-    
-    // 1. Ayarları yükle
-    loadSettings();
-
-    // 2. Slider'ın görsel durumunu ve başlangıç metnini ayarla
-    volumeSlider.style.background = `linear-gradient(to right, var(--color-neon) ${currentValue}%, rgba(245, 245, 245, 0.2) ${currentValue}%)`;
-    updateNeedle(currentValue);
-    updateFrequencyDisplay(currentValue);
-    
-    // 3. Pause durumuna göre başlangıç durumunu ayarla
-    if (!isPaused) {
-        // Eğer aktif durumda kaydedilmişse, hareketi başlat
-        activateButton.innerHTML = 'Pause <span class="ml-2">||</span>';
-        activateButton.style.backgroundColor = 'var(--color-neon)';
-        activateButton.style.color = 'black';
-        dataDisplay.innerHTML = `Bağlantı Durumu: <span class="text-white header-glow">AKTİF - RİTİM BAŞLADI!</span>`;
-        frequencyDisplay.style.color = 'white';
-        startNeedleMovement();
-    } else {
-        // Eğer duraklatılmış durumda kaydedilmişse, görseli güncelle
-        activateButton.innerHTML = 'Aktif <span class="ml-2">▶</span>';
-        activateButton.style.backgroundColor = 'var(--color-light-form)';
-        activateButton.style.color = 'var(--color-bg-deep)';
-        dataDisplay.innerHTML = `Bağlantı Durumu: <span class="text-yellow-400 glow-text-sm">DURAKLATILDI.</span>`;
-        frequencyDisplay.style.color = 'gray';
-        stopNeedleMovement(); // Hareketi durdur
-    }
-    
-    // --- OLAY DİNLEYİCİLERİ ---
-
-    activateButton.addEventListener('click', () => {
-        isPaused = !isPaused;
+    <section class="ruhani-form p-6 rounded-xl mb-6 text-center">
         
-        if (isPaused) {
-            stopNeedleMovement();
-            activateButton.innerHTML = 'Aktif <span class="ml-2">▶</span>';
-            activateButton.style.backgroundColor = 'var(--color-light-form)';
-            activateButton.style.color = 'var(--color-bg-deep)';
-            dataDisplay.innerHTML = `Bağlantı Durumu: <span class="text-yellow-400 glow-text-sm">DURAKLATILDI.</span>`;
-            frequencyDisplay.style.color = 'gray';
+        <p id="frequency-display" class="text-3xl font-extrabold mb-6 text-white header-glow">
+            440.00 Hz - A4
+        </p>
 
-        } else {
-            startNeedleMovement();
-            activateButton.innerHTML = 'Pause <span class="ml-2">||</span>';
-            activateButton.style.backgroundColor = 'var(--color-neon)';
-            activateButton.style.color = 'black';
-            dataDisplay.innerHTML = `Bağlantı Durumu: <span class="text-white header-glow">AKTİF - RİTİM BAŞLADI!</span>`;
-            frequencyDisplay.style.color = 'white';
-        }
-        
-        // Pause durumunu kaydet
-        saveSettings();
-    });
+        <div id="gauge-container" class="relative w-64 h-64 mx-auto mb-8">
+            
+            <div class="absolute inset-0 rounded-full" 
+                 style="background-color: rgba(245, 245, 245, 0.05); border: 3px solid var(--color-neon); box-shadow: 0 0 20px rgba(0, 224, 255, 0.8);">
+            </div>
+            
+            <div id="gauge-needle" class="absolute left-1/2 top-1/2 -ml-0.5 -mt-20 w-1 h-20 bg-red-500 rounded-full" 
+                 style="background-color: var(--color-neon); transform-origin: bottom center; transform: rotate(12deg); transition: transform 0.1s linear;">
+            </div>
+            
+            <div class="absolute left-1/2 top-1/2 -ml-3 -mt-3 w-6 h-6 rounded-full" 
+                 style="background-color: var(--color-neon); box-shadow: 0 0 10px var(--color-neon);">
+            </div>
+            
+        </div>
 
-    // Ses Şiddeti kaydırıcısı
-    volumeSlider.addEventListener('input', (e) => {
-        currentValue = parseInt(e.target.value);
-        
-        // Kaydırıcının doluluk rengini güncelle
-        volumeSlider.style.background = `linear-gradient(to right, var(--color-neon) ${currentValue}%, rgba(245, 245, 245, 0.2) ${currentValue}%)`;
-        
-        // Eğer duraklatılmışsa, iğneyi ve metni sabitle
-        if (isPaused) {
-            updateNeedle(currentValue); 
-            updateFrequencyDisplay(currentValue);
-        }
-        
-        // Ses şiddetini kaydet
-        saveSettings();
-    });
+        <button id="activate-button" class="py-3 px-8 text-black font-bold rounded-lg shadow-lg transition duration-300 transform active:scale-95 mx-auto block mb-6" 
+            style="background-color: var(--color-neon); border: 2px solid var(--color-light-form);">
+            Pause <span class="ml-2">||</span>
+        </button>
+
+        <div class="mb-4">
+            <label for="volume-slider" class="block text-sm font-light mb-2 glow-text-sm">
+                Ses Şiddeti
+            </label>
+            <input type="range" id="volume-slider" min="0" max="100" value="70" class="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                style="background: linear-gradient(to right, var(--color-neon) 70%, rgba(245, 245, 245, 0.2) 70%);">
+        </div>
+
+    </section>
+
+    <section class="ruhani-form p-6 rounded-xl">
+        <h2 class="text-xl font-semibold mb-4 text-white glow-text-lg">
+            Kozmik Veri Akışı
+        </h2>
+        <div id="data-display" class="bg-gray-900 p-4 rounded-lg border border-gray-700 text-sm font-mono text-gray-200 glow-text-sm">
+            Bağlantı Durumu: <span class="text-white header-glow">AKTİF - RİTİM BAŞLADI!</span>
+        </div>
+    </section>
+    
+</div>
