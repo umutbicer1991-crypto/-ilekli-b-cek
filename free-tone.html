@@ -1,33 +1,42 @@
 <head>
 <title>İnteraktif Frekans Ayarlayıcı ve Ses Kontrolü</title>
 <style>
-/* ------------------------------------- */
-/* CSS KODU */
-/* ------------------------------------- */
+/* ---------------------------------------------------------------- */
+/* A) MÜKEMMEL HİZALAMA VE TAM EKRAN BOYUTLANDIRMA */
+/* ---------------------------------------------------------------- */
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
 body {
     display: flex;
     flex-direction: column; 
-    align-items: center; 
-    justify-content: center; 
-    /* ... */
+    align-items: center;    
+    justify-content: center;  /* Tüm içeriği dikeyde (ekranın tam ortasına) ortalar */
+    min-height: 100vh; /* Mobil ekranı tam kaplama */
+    font-family: sans-serif;
+    background-color: #f0f0f0;
 }
 
-
+/* ---------------------------------------------------------------- */
+/* B) BOYUT VE ORANTILAMA AYARLARI */
+/* ---------------------------------------------------------------- */
 
 #frequency-display {
-    /* ... */
-    /* margin-bottom: 5vh;  <-- Bu satırı bul */
-    margin-bottom: 3vh; /* Veya 2vh yapabiliriz, küçük bir boşluk yeterli */
+    font-size: 10vh; /* Büyük font */
+    font-weight: bold;
+    color: #34495e;
+    margin-bottom: 3vh; /* Kadran ile aradaki boşluk */
 }
 
-
-
-/* Kadran Stilleri (Aynı) */
 #dial-container {
     position: relative;
-    /* Px yerine vmin kullanıyoruz (ekranın %80'i) */
-    width: 84vmin; 
-    height: 84vmin;
+    width: 90vmin; /* Kadranı ekranın %90'ı büyüklüğüne zorlar */
+    height: 90vmin;
     background-color: #ccc;
     border-radius: 50%;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
@@ -35,60 +44,40 @@ body {
     touch-action: none;
 }
 
+/* ---------------------------------------------------------------- */
+/* C) DETAY VE BUTON ORANTILAMA (Küçük Görünümü Düzelten) */
+/* ---------------------------------------------------------------- */
 
-#dial {
-    width: 100%;
-    height: 100%;
+#center-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 35px; /* Büyük merkez nokta */
+    height: 35px;
+    margin-top: -17.5px; 
+    margin-left: -17.5px; 
+    background-color: #34495e;
     border-radius: 50%;
-    background: linear-gradient(145deg, #e6e6e6, #ffffff);
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
-
 
 #indicator {
     position: absolute;
     top: 0;
     left: 50%;
-    /* Şu anki ince kırmızı çubuk. Daha belirgin yapalım: */
-    width: 10px; /* Daha kalın */
-    height: 50px; /* Daha uzun */
+    width: 10px; /* Kalın gösterge çubuğu */
+    height: 50px; /* Uzun gösterge çubuğu */
     margin-left: -5px; 
-    background-color: #e74c3c; 
+    background-color: #e74c3c;
     transform-origin: bottom center;
 }
 
-
-#center-dot {
-    width: 35px;
-    height: 35px;
-    background-color: #34495e;
-    border-radius: 50%;
-    position: absolute;
-    top: 17.5%;
-    left: 17.5%;
-    transform: translate(-50%, -50%);
-    z-index: 10;
+button {
+    padding: 20px 40px; /* Butonun içindeki boşluğu artırır */
+    font-size: 1.8em;   /* Butonun içindeki yazıyı büyütür */
+    margin-top: 20px; /* Kadran ile aradaki boşluk */
+    /* Buton için diğer mevcut stilleri buraya eklemeyi unutmayın */
 }
 
-/* Play/Pause Buton Stili */
-#play-pause-btn {
-    margin-top: 15px;
-    padding: 20px 40px;
-    font-size: 1.5em;
-    font-weight: bold;
-    color: white;
-    background-color: #2ecc71; /* Yeşil Play */
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-#play-pause-btn.paused {
-    background-color: #e74c3c; /* Kırmızı Pause */
-}
 </style>
 </head>
 <body>
