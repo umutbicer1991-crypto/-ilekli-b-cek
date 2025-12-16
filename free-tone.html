@@ -114,7 +114,8 @@ body {
     // ------------------------------------- 
     const A4_FREKANS = 440.0;
     const YARIM_SES_SAYISI = 12;
-    const NOTA_ISIMLERI = 
+    const NOTA_ISIMLERI = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
 
 
     let audioContext;
@@ -154,8 +155,10 @@ body {
         const n_hesapla = YARIM_SES_SAYISI * Math.log2(frekans / A4_FREKANS);
         const n_tam = Math.round(n_hesapla);
 
-        const nota_indeksi = (n_tam + 9) % YARIM_SES_SAYISI;
-        const oktav = 4 + Math.floor((n_tam + 9) / YARIM_SES_SAYISI);
+        const nota_indeksi = n_tam % YARIM_SES_SAYISI;
+
+        const oktav = 4 + Math.floor(n_tam / YARIM_SES_SAYISI);
+
 
         const nota_adi = NOTA_ISIMLERI[nota_indeksi];
         return `${frekans.toFixed(2)} Hz - ${nota_adi}${oktav}`;
