@@ -46,27 +46,28 @@ body {
     justify-content: center;
 }
 
+
 #indicator {
     position: absolute;
-    width: 20px;
-    height: 80px;
-    background-color: #e74c3c;
-    transform-origin: bottom center;
-    top: 50px;
+    top: 0;
     left: 50%;
-    margin-left: -4px;
-    border-radius: 4px;
-    transition: transform 0.05s linear;
+    /* Şu anki ince kırmızı çubuk. Daha belirgin yapalım: */
+    width: 10px; /* Daha kalın */
+    height: 50px; /* Daha uzun */
+    margin-left: -5px; 
+    background-color: #e74c3c; 
+    transform-origin: bottom center;
 }
 
+
 #center-dot {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     background-color: #34495e;
     border-radius: 50%;
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 17.5%;
+    left: 17.5%;
     transform: translate(-50%, -50%);
     z-index: 10;
 }
@@ -74,8 +75,8 @@ body {
 /* Play/Pause Buton Stili */
 #play-pause-btn {
     margin-top: 15px;
-    padding: 10px 20px;
-    font-size: 1.1em;
+    padding: 20px 40px;
+    font-size: 1.5em;
     font-weight: bold;
     color: white;
     background-color: #2ecc71; /* Yeşil Play */
